@@ -182,6 +182,8 @@ def train_model(config):
 
         batch_itr = tqdm(train_dataloader, desc=f"Epoch {epoch:02d}", total=len(train_dataloader))
         for batch in batch_itr:
+            model.train()
+
             encoder_input = batch['encoder_input'].to(device) # (Batch, Seq_len)
             decoder_input = batch['decoder_input'].to(device) # (Batch, Seq_len)
             encoder_mask = batch['encoder_mask'].to(device) # (Batch, 1, 1, Seq_len)
@@ -209,6 +211,8 @@ def train_model(config):
             optimizer.zero_grad()
 
             global_step += 1
+
+        run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config['seq_len'], device, lambda msg: batch_itr.write(msg), global_step, writer)
 
         # Save model at end of epoch
         model_filename = get_weights_file_path(config, f'{epoch:02d}')
